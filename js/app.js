@@ -7,7 +7,6 @@ var Calculadora = (function(){
     var numeroAnterior = 0;
     var operacionAnterior = "mas";
     var teclaAnterior = "";
-    var numeroActualProvisional = 0;
 
     //funcion llamada al hacer click
     var teclaPresionada = function(ev){
@@ -34,8 +33,8 @@ var Calculadora = (function(){
                 break;
             case 'sign':
                 if (teclaAnterior == 'mas' ||teclaAnterior == 'menos' ||teclaAnterior == 'por' ||teclaAnterior == 'dividido' || teclaAnterior == 'igual'){
-                    numeroAnterior = (comprobarLargo(-numeroAnterior));
-                    presentarEnDisplay(numeroAnterior);
+                    //numeroAnterior = (comprobarLargo(-numeroAnterior));
+                    //presentarEnDisplay(numeroAnterior);
                 } else{
                     numeroActual = (comprobarLargo(-numeroActual));
                     presentarEnDisplay(numeroActual);
