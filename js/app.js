@@ -29,7 +29,16 @@ var Calculadora = (function(){
                 generarNumeroActual(teclaPresionada);
                 break;
             case 'punto':
-                generarNumeroActual('.');
+                var numeroProvisional = String(numeroActual); 
+                var salir = false;               
+                for (let ii = 0; ii < numeroProvisional.length; ii++) {
+                    if (numeroProvisional[ii] == '.'){
+                        salir = true;
+                    }
+                }
+                if (salir == false){
+                    generarNumeroActual('.');
+                }
                 break;
             case 'sign':
                 if (teclaAnterior == 'mas' ||teclaAnterior == 'menos' ||teclaAnterior == 'por' ||teclaAnterior == 'dividido' || teclaAnterior == 'igual'){
@@ -101,7 +110,6 @@ var Calculadora = (function(){
     var encerarCalculadora = function(){
         numeroTexto = "0";
         numeroActual = 0;
-        numeroActualProvisional = 0;
         numeroAnterior = 0;
         operacionAnterior = "mas";
     }
