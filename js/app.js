@@ -1,126 +1,142 @@
 var Calculadora = (function(){
     "use strict";
-    console.log('numeroAnterior','operacionAnterior','numeroActual');
     //declaracion e inicializacion de variables globales
-    var numeroTexto = "0";
+    var numeroTexto = '0';
     var numeroActual = 0;
     var numeroAnterior = 0;
     var operacionAnterior = "mas";
     var teclaAnterior = "";
+    var auxiliarSigno = false;
+    var auxiliarIgual = '0';
+    var numTooBig = false;
+
+    console.log('teclPres',"----",'numAnter',"----",'opAnter',"----",'numAct',"---------",'numeroTexto');   
+
 
     //funcion llamada al hacer click
-    var teclaPresionada = function(ev){
+    var funcionTeclaPresionada = function(ev){
         if(ev.target.classList.contains("tecla")){
             achicarTecla(ev);
             procesarDatos(ev.target.id); 
-            console.log("---------",numeroAnterior,"---------",operacionAnterior,"---------",numeroActual,"---------");   
+            console.log("-----",ev.target.id,"---------",numeroAnterior,"---------",operacionAnterior,"---------",numeroActual,"----------",numeroTexto);   
         }
     }
     //funcion para procesar los datos
     var procesarDatos = function(teclaPresionada){
         switch (teclaPresionada) {
             case 'on':
-            //en caso de aplastar ON se resetea la calculadora
                 encerarCalculadora();
                 presentarEnDisplay(0);
                 break;
             case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
-            //en caso de aplastar UN NUMERO se va generando el numero completo actual
                 generarNumeroActual(teclaPresionada);
+                presentarEnDisplay(numeroActual);
                 break;
             case 'punto':
-                var numeroProvisional = String(numeroActual); 
-                var salir = false;               
-                for (let ii = 0; ii < numeroProvisional.length; ii++) {
-                    if (numeroProvisional[ii] == '.'){
-                        salir = true;
-                    }
-                }
-                if (salir == false){
-                    generarNumeroActual('.');
-                }
+                anadirPunto();
                 break;
             case 'sign':
-                if (teclaAnterior == 'mas' ||teclaAnterior == 'menos' ||teclaAnterior == 'por' ||teclaAnterior == 'dividido' || teclaAnterior == 'igual'){
-                    //numeroAnterior = (comprobarLargo(-numeroAnterior));
-                    //presentarEnDisplay(numeroAnterior);
-                } else{
-                    numeroActual = (comprobarLargo(-numeroActual));
-                    presentarEnDisplay(numeroActual);
-                }
+                cambiarSigno();
                 break
             case 'mas':case 'menos':case 'por':case 'dividido':
-            //en caso de aplastar MAS MENOS POR o DIVIDIDO se procesa la operacion anterior
-            //luego se guarda el numeroActual en numeroAnterior y la funcion matematica MAS o -*/ para la siguiente operacion; y vacio el texto para el siguiente ingreso de numeros
-            //el if sirve paa que no pase nada cuando aplastamos operaciones varias veces
-                if (teclaAnterior != teclaPresionada){
-                    if(teclaAnterior == 'igual'){
-                        numeroTexto = '0';
-                        operacionAnterior = teclaPresionada;
-                    } else if (teclaAnterior == 'sign'){
-                        numeroTexto = "0";
-                        numeroAnterior = numeroActual;
-                        operacionAnterior = teclaPresionada;
-                    } else if(teclaAnterior != 'mas'&&teclaAnterior != 'menos'&&teclaAnterior != 'por'&&teclaAnterior != 'dividido'){
-                        //opero
-                        numeroActual = operar(operacionAnterior,numeroAnterior,numeroActual);                                 
-                        //seteo para la proxima
-                        numeroTexto = "0";
-                        numeroAnterior = numeroActual;
-                        operacionAnterior = teclaPresionada;
-                        //presento
-                        //presentarEnDisplay(numeroActual); // no presento porque asi dice la instruccion 
-                    }  else{
-                        //si es +-*/ seteo para el proximo texto y la operacion
-                        operacionAnterior = teclaPresionada;
-                    }                   
-                }
-                numeroActual = comprobarLargo(numeroActual);
-                presentarEnDisplay("");
+                procesarTeclaOperacion(teclaPresionada);
                 break;
             case 'igual':
-            //en caso de aplastar IGUAL proceso la operacion anterior
-            //en caso de ser la primera vez: grabo el actual en un provisional, opero y luego paso el provisional al anterior
-            //de esta forma en las siguientes veces solo opero y anterior siempre va a ser el que quiero
-                numeroAnterior = operar(operacionAnterior,numeroAnterior,numeroActual);
-                numeroAnterior = comprobarLargo(numeroAnterior);
-                presentarEnDisplay(numeroAnterior);
+                procesarTeclaIgual();
             break;
             default:
                 break;
         }
+        if (teclaPresionada != 'sign'){
+            auxiliarSigno = false;
+        }
         teclaAnterior = teclaPresionada;
+    }
+    var procesarTeclaIgual = function(){
+        if(teclaAnterior == 'igual'){
+            numeroActual = operar(operacionAnterior,numeroAnterior,auxiliarIgual);
+        }
+        else{
+            auxiliarIgual = numeroActual;
+            numeroActual = operar(operacionAnterior,numeroAnterior,numeroActual);
+        }
+        comprobarLargo(numeroActual);
+        numeroTexto = String(numeroActual);
+        numeroAnterior = numeroActual;
+        presentarEnDisplay(numeroTexto);
+        if (numTooBig){
+            encerarCalculadora();
+            presentarEnDisplay('NumTooBIG');
+            numTooBig = false;
+        }
+    }
+    var procesarTeclaOperacion = function(teclaPresionada){
+        if(teclaAnterior == 'igual'){
+        }
+        else if (teclaAnterior == 'sign'){
+            numeroAnterior = numeroActual;
+        }
+        else if(teclaAnterior != 'mas'&&teclaAnterior != 'menos'&&teclaAnterior != 'por'&&teclaAnterior != 'dividido'){
+            numeroActual = operar(operacionAnterior,numeroAnterior,numeroActual);
+            comprobarLargo(numeroActual);
+            numeroAnterior = numeroActual;
+        }
+        numeroTexto = '';
+        presentarEnDisplay(numeroTexto);
+        operacionAnterior = teclaPresionada;
+        if (numTooBig){
+            encerarCalculadora();
+            presentarEnDisplay('NumTooBIG');
+            numTooBig = false;
+        }
     }
     var comprobarLargo = function(numero){
         if(String(numero).length >8){
-            if(numero>99999999 || numero<-9999999){
-                presentarEnDisplay('NumTooBIG');
-                encerarCalculadora();
+            if(numero>99999999 || numero<-99999999){
+                numTooBig = true;
             }
             else{
-                numero = Number(String(numero).substr(0,8));
-                return numero;
+                numeroActual = Number(String(numero).substr(0,8));
             }
         }
+    }
+    var cambiarSigno = function(){
+        if (teclaAnterior == 'mas' ||teclaAnterior == 'menos' ||teclaAnterior == 'por' ||teclaAnterior == 'dividido' ||auxiliarSigno == true){
+            auxiliarSigno = true;
+            numeroTexto = '';
+        } 
         else{
-            return numero;
+            if(numeroTexto.includes('-')){numeroTexto = numeroTexto.substr(1);}
+            else{if(numeroTexto == '0'){numeroTexto = '0'}
+                else {numeroTexto = '-' + numeroTexto}}
+            numeroActual = -numeroActual;
+            presentarEnDisplay(numeroTexto);
         }
     }
-    //funcion para reestablecer los valores iniciales de las variables
-    var encerarCalculadora = function(){
-        numeroTexto = "0";
-        numeroActual = 0;
-        numeroAnterior = 0;
-        operacionAnterior = "mas";
+    //funcion para comprobar si ya hay un punto y si no lo hay anadir un punto en el numero
+    var anadirPunto = function(){
+        if(String(numeroActual).includes('.')){}
+        else{
+            generarNumeroActual('.');
+            presentarEnDisplay(String(numeroActual)+'.');
+        }
     }
     //funcion para recojer cada numero presionado y generar numero actual
     var generarNumeroActual = function(teclaPresionada){
         if (numeroTexto.length < 8){
-            if(numeroTexto == "0"){numeroTexto = teclaPresionada}
+            if(numeroTexto == "0"||numeroTexto == "-0"){numeroTexto = teclaPresionada}
             else{numeroTexto += teclaPresionada;}
             numeroActual = Number(numeroTexto);
-            presentarEnDisplay(numeroActual);
         }
+    }
+    //funcion para reestablecer los valores iniciales de las variables
+    var encerarCalculadora = function(){
+        numeroActual = 0;
+        numeroTexto = '0';
+        numeroAnterior = 0;
+        operacionAnterior = "mas";
+        console.clear();
+        console.log('teclPres',"----",'numAnter',"----",'opAnter',"----",'numAct',"---------",'numeroTexto');   
     }
     //funciones de las operaciones matematicas
     var operar = function(operacion,a,b){
@@ -160,5 +176,5 @@ var Calculadora = (function(){
         document.removeEventListener("mouseup", agrandarTecla);
     }
     //listener que escucha que se presiono una tecla
-    document.addEventListener("mousedown",teclaPresionada)
+    document.addEventListener("mousedown",funcionTeclaPresionada)
 })();
